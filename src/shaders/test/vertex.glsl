@@ -31,7 +31,7 @@ void main() {
     float radius = length(position.xy);
     float angle = atan(position.y, position.x);
     float pulsation = sin(radius * scale + audioData) * pulsationIntensity +pulsationOffset;
-    float scaledRadius = radius * pulsation;
+    float scaledRadius = (radius * pulsation);
     vec3 scaledPosition = vec3(cos(angle) * scaledRadius, sin(angle) * scaledRadius, position.z );
     vec4 modelPosition = modelMatrix * vec4(scaledPosition, 1.0);
     vec4 viewPosition = viewMatrix * modelPosition;

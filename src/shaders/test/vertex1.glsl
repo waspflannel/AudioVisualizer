@@ -23,7 +23,7 @@ void main() {
     float minScale = 0.5;
     float maxScale = 2.0;
     float scale = mix(minScale, maxScale, normalizedAudio);
-    vec3 scaledPosition = ((sin(position * scale*4.0))) * (cos(position * scale*4.0)); 
+    vec3 scaledPosition = (((sin(position * scale*4.0))) * (cos(position * scale*4.0))); 
 
     vec4 modelPosition = modelMatrix * vec4(scaledPosition, 1.0);
 
