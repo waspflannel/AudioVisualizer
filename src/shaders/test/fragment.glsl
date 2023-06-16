@@ -12,7 +12,7 @@ void main()
     //vec3 colorEnd = vec3(0.3,0.8,0.9);
     vec3 colorMid = vec3(0.0,0.5,0.5); 
 
-    vec3 colorMid2 = vec3(0.0,0.5,0.0);
+    vec3 colorMid2 = vec3(0.0,0.3,0.0);
 
     vec3 colorEnd = vec3(0.0,0.0,1.0);   
 

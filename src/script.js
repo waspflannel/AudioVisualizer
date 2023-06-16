@@ -108,6 +108,7 @@ const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 
 
 //camera.lookAt(mesh1.position);
 camera.position.set(0,25,0)
+
 scene.add(camera);
 
 // create an AudioListener and add it to the camera
@@ -133,6 +134,9 @@ const analyser = new THREE.AudioAnalyser( sound, 32768);
 // Controls
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
+controls.enableZoom = false;
+controls.enablePan = false;
+controls.enableRotate = false
 controls.update();
 
 
