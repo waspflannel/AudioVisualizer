@@ -25,7 +25,7 @@ void main() {
     float normalizedAudio = audioData / 255.0;
     float minScale = 1.0;
     float maxScale = 2.0;
-    float pulsationIntensity = 0.5;
+    float pulsationIntensity = 0.8;
     float pulsationOffset = 2.0;
     float scale = mix(minScale, maxScale, normalizedAudio);
     float radius = length(position.xy);

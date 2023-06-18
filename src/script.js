@@ -25,7 +25,7 @@ const textureLoader = new THREE.TextureLoader()
  * Test mesh
  */
 // Geometry
-const geometry = new THREE.PlaneGeometry(10, 10, 64,64)
+const geometry = new THREE.PlaneGeometry(5, 5, 64,64)
 
 const sphere = new THREE.SphereGeometry(1,32,32)
 
@@ -61,7 +61,7 @@ gui.add(mesh, 'material', {
     lines: lines,
   }).onChange(() => {
     if (mesh.material === circle) {
-      camera.position.set(0, 25, 0);
+      camera.position.set(0, 10, 0);
     } else if (mesh.material === lines) {
       camera.position.set(0, 1, 0);
     }
@@ -107,7 +107,7 @@ const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 
 
 
 //camera.lookAt(mesh1.position);
-camera.position.set(0,25,0)
+camera.position.set(0,10,0)
 
 scene.add(camera);
 
@@ -120,7 +120,7 @@ const sound = new THREE.Audio( listener );
 
 // load a sound and set it as the Audio object's buffer
 const audioLoader = new THREE.AudioLoader();
-audioLoader.load( 'ambient3.mp3', function( buffer ) {
+audioLoader.load( 'ambient1.mp3', function( buffer ) {
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
 	sound.setVolume(0.2);
@@ -160,8 +160,8 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
  const vert = () =>{
     const audioData = analyser.getAverageFrequency();
-    circle.uniforms.audioData.value = audioData;
-    lines.uniforms.audioData.value = audioData;
+    circle.uniforms.audioData.value = audioData*0.5;
+    lines.uniforms.audioData.value = audioData*0.3;
  }
 
 

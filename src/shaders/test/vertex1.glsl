@@ -26,7 +26,6 @@ void main() {
     vec3 scaledPosition = (((sin(position * scale*4.0))) * (cos(position * scale*4.0))); 
 
     vec4 modelPosition = modelMatrix * vec4(scaledPosition, 1.0);
-
     vec4 viewPosition = viewMatrix * modelPosition;
     vec4 projectedPosition = projectionMatrix * viewPosition;
     gl_Position = projectedPosition;
