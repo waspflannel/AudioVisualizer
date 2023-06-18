@@ -25,7 +25,7 @@ const textureLoader = new THREE.TextureLoader()
  * Test mesh
  */
 // Geometry
-const geometry = new THREE.PlaneGeometry(5, 5, 64,64)
+const geometry = new THREE.PlaneGeometry(5, 5,45,45)
 
 const sphere = new THREE.SphereGeometry(1,32,32)
 
@@ -61,7 +61,7 @@ gui.add(mesh, 'material', {
     circles: circle,
   }).onChange(() => {
     if (mesh.material === circle) {
-      camera.position.set(0, 10, 0);
+      camera.position.set(0, 15, 0);
     } else if (mesh.material === lines) {
       camera.position.set(0, 1, 0);
     }
@@ -101,7 +101,7 @@ window.addEventListener('resize', () =>
  * Camera
  */
 // Base camera
-const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100);
+const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 75);
 
 
 
@@ -160,7 +160,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
  const vert = () =>{
     const audioData = analyser.getAverageFrequency();
-    circle.uniforms.audioData.value = audioData*0.5;
+    circle.uniforms.audioData.value = audioData*0.4;
     lines.uniforms.audioData.value = audioData*0.3;
  }
 
