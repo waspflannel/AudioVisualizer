@@ -55,10 +55,10 @@ const lines = new THREE.RawShaderMaterial({
 })
 
 // Mesh
-const mesh = new THREE.Mesh(geometry, circle)
+const mesh = new THREE.Mesh(geometry, lines)
 gui.add(mesh, 'material', {
-    circles: circle,
     lines: lines,
+    circles: circle,
   }).onChange(() => {
     if (mesh.material === circle) {
       camera.position.set(0, 10, 0);
@@ -107,7 +107,7 @@ const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 
 
 
 //camera.lookAt(mesh1.position);
-camera.position.set(0,10,0)
+camera.position.set(0,1,0)
 
 scene.add(camera);
 
@@ -120,7 +120,7 @@ const sound = new THREE.Audio( listener );
 
 // load a sound and set it as the Audio object's buffer
 const audioLoader = new THREE.AudioLoader();
-audioLoader.load( 'ambient1.mp3', function( buffer ) {
+audioLoader.load( 'ambient3.mp3', function( buffer ) {
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
 	sound.setVolume(0.2);
