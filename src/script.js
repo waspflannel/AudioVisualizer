@@ -54,7 +54,7 @@ gui.add(mesh, 'material', {
     if (mesh.material === circle) {
       camera.position.set(0, 15, 0);
     } else if (mesh.material === lines) {
-      camera.position.set(0, 0.6, 0);
+      camera.position.set(0, 1.5, 0);
     }
     controls.update();
   }).name('visualizer');
@@ -101,12 +101,11 @@ camera.add( listener );
 
 const audioListener = new THREE.AudioListener();
 const sound = new THREE.Audio(audioListener);
-const handleSongChange = (event) => {
-  const file = event.target.files[0]; 
+const handleSongChange = (e) => {
+  const file = e.target.files[0]; 
   if (sound.isPlaying) {
     sound.stop(); 
   }
-
   const audioLoader = new THREE.AudioLoader();
   audioLoader.load(URL.createObjectURL(file), function(buffer) {
     sound.setBuffer(buffer);
