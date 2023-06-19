@@ -4,6 +4,7 @@ import * as dat from 'lil-gui'
 import Vertex from './shaders/test/vertex.glsl'
 import Fragment from './shaders/test/fragment.glsl'
 import Vertex1 from './shaders/test/vertex1.glsl'
+import Vertex2 from './shaders/test/vertex2.glsl'
 /**
  * Base
  */
@@ -40,7 +41,8 @@ const circle = new THREE.RawShaderMaterial({
     wireframe:true,
     uniforms: {
         audioData: { value: 0 },
-        modelViewMatrix: { value: new THREE.Matrix4() }
+        modelViewMatrix: { value: new THREE.Matrix4() },
+        u_resolution: { value: new THREE.Vector2() },
     }
 })
 const lines = new THREE.RawShaderMaterial({
@@ -120,7 +122,7 @@ const sound = new THREE.Audio( listener );
 
 // load a sound and set it as the Audio object's buffer
 const audioLoader = new THREE.AudioLoader();
-audioLoader.load( 'ambient3.mp3', function( buffer ) {
+audioLoader.load( 'ambient4.mp3', function( buffer ) {
 	sound.setBuffer( buffer );
 	sound.setLoop(true);
 	sound.setVolume(0.2);
@@ -163,7 +165,6 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     circle.uniforms.audioData.value = audioData*0.4;
     lines.uniforms.audioData.value = audioData*0.3;
  }
-
 
 
  const tick = () => {

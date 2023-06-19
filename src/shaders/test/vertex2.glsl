@@ -17,8 +17,6 @@ void main() {
     
     vAudioData = audioData;
 
-
-
     float normalizedAudio = audioData / 255.0;
     float minScale = 0.5;
     float maxScale = 2.0;
