@@ -5,35 +5,25 @@ import Vertex from './shaders/test/vertex.glsl'
 import Fragment from './shaders/test/fragment.glsl'
 import Vertex1 from './shaders/test/vertex1.glsl'
 import Vertex2 from './shaders/test/vertex2.glsl'
-/**
- * Base
- */
-// Debug
+
 const gui = new dat.GUI()
 const debugObject = {}
-// Canvas
+
 const canvas = document.querySelector('canvas.webgl')
 
-// Scene
+
 const scene = new THREE.Scene()
 
-/**
- * Textures
- */
 const textureLoader = new THREE.TextureLoader()
 
-/**
- * Test mesh
- */
-// Geometry
 const geometry = new THREE.PlaneGeometry(5, 5,45,45)
 
 const sphere = new THREE.SphereGeometry(1,32,32)
 
 
+const songInput = document.getElementById("myfile");
 
 
-// Material
 const circle = new THREE.RawShaderMaterial({
     vertexShader: Vertex,
     fragmentShader: Fragment,
@@ -56,7 +46,6 @@ const lines = new THREE.RawShaderMaterial({
     }
 })
 
-// Mesh
 const mesh = new THREE.Mesh(geometry, lines)
 gui.add(mesh, 'material', {
     lines: lines,
@@ -76,9 +65,6 @@ scene.add(mesh)
 
 
 
-/**
- * Sizes
- */
 const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
@@ -99,36 +85,38 @@ window.addEventListener('resize', () =>
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 })
 
-/**
- * Camera
- */
-// Base camera
+
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 75);
 
 
 
 
-//camera.lookAt(mesh1.position);
+
 camera.position.set(0,1.5,0)
 
 scene.add(camera);
 
-// create an AudioListener and add it to the camera
 const listener = new THREE.AudioListener();
 camera.add( listener );
 
-// create an Audio source
-const sound = new THREE.Audio( listener );
+const audioListener = new THREE.AudioListener();
+const sound = new THREE.Audio(audioListener);
+const handleSongChange = (event) => {
+  const file = event.target.files[0]; 
+  if (sound.isPlaying) {
+    sound.stop(); 
+  }
 
-// load a sound and set it as the Audio object's buffer
-const audioLoader = new THREE.AudioLoader();
-audioLoader.load( 'ambient4.mp3', function( buffer ) {
-	sound.setBuffer( buffer );
-	sound.setLoop(true);
-	sound.setVolume(0.2);
-	sound.play();
-});
-// create an AudioAnalyser, passing in the sound and desired fftSize
+  const audioLoader = new THREE.AudioLoader();
+  audioLoader.load(URL.createObjectURL(file), function(buffer) {
+    sound.setBuffer(buffer);
+    sound.setLoop(true);
+    sound.setVolume(0.2);
+    sound.play();
+  });
+}
+songInput.addEventListener("change", handleSongChange);
+
 const analyser = new THREE.AudioAnalyser( sound, 32768);
 
 
