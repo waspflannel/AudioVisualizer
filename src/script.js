@@ -65,7 +65,7 @@ gui.add(mesh, 'material', {
     if (mesh.material === circle) {
       camera.position.set(0, 15, 0);
     } else if (mesh.material === lines) {
-      camera.position.set(0, 1, 0);
+      camera.position.set(0, 0.6, 0);
     }
     controls.update();
   }).name('visualizer');
@@ -109,7 +109,7 @@ const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 
 
 
 //camera.lookAt(mesh1.position);
-camera.position.set(0,1,0)
+camera.position.set(0,1.5,0)
 
 scene.add(camera);
 
