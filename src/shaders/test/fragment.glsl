@@ -1,5 +1,8 @@
 precision mediump float;
 
+
+
+
 varying float vAudioData;
 
 void main() {

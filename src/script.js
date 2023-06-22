@@ -4,10 +4,16 @@ import * as dat from 'lil-gui'
 import Vertex from './shaders/test/vertex.glsl'
 import Fragment from './shaders/test/fragment.glsl'
 import Vertex1 from './shaders/test/vertex1.glsl'
-import Vertex2 from './shaders/test/vertex2.glsl'
+
+import waterVertexShader from "./shaders/water/vertex.glsl"
+import waterFragmentShader from "./shaders/water/fragment.glsl"
+
 
 const gui = new dat.GUI()
 const debugObject = {}
+const debug = {}
+debug.depthColor = '#284382'
+debug.surfaceColor = '#b6a9f1'
 
 const canvas = document.querySelector('canvas.webgl')
 
@@ -18,8 +24,36 @@ const textureLoader = new THREE.TextureLoader()
 
 const geometry = new THREE.PlaneGeometry(5, 5,45,45)
 
-const sphere = new THREE.SphereGeometry(1,32,32)
 
+const waterGeometry = new THREE.PlaneGeometry(5, 5, 512, 512)
+const waterMaterial = new THREE.ShaderMaterial({
+  vertexShader: waterVertexShader,
+  fragmentShader: waterFragmentShader,
+  uniforms:
+  {
+      uTime:{value:0},
+
+
+      uBigWavesElevation:{value:0.2},
+      uBigWavesFrequency:{value: new THREE.Vector2(1.5,1)},
+      uBigWavesSpeed:{value:0.0},
+
+      uSmallWavesElevation:{value:0.15},
+      uSmallWavesFrequency:{value:3},
+      uSmallWavesSpeed:{value:0.0},
+      uSmallIterations:{value:4.0},
+
+
+
+      uDepthColor: {value: new THREE.Color(debug.depthColor)},
+      uSurfaceColor: {value: new THREE.Color(debug.surfaceColor)},
+      uColorOffset:{value:0.16},
+      uColorMultiplier:{value:5},
+      
+  }
+})
+const water = new THREE.Mesh(waterGeometry, waterMaterial)
+water.rotation.x = - Math.PI * 0.5
 
 const songInput = document.getElementById("myfile");
 
@@ -50,16 +84,26 @@ const mesh = new THREE.Mesh(geometry, lines)
 gui.add(mesh, 'material', {
     lines: lines,
     circles: circle,
+    waves: waterMaterial,
   }).onChange(() => {
     if (mesh.material === circle) {
+      scene.remove(water)
+      scene.add(mesh)
       camera.position.set(0, 15, 0);
     } else if (mesh.material === lines) {
+      scene.remove(water)
+      scene.add(mesh)
       camera.position.set(0, 1.5, 0);
+    }
+    else if (mesh.material === waterMaterial){
+      scene.remove(mesh)
+      scene.add(water)
+      camera.position.set(0, 2.89,  2.76);
     }
     controls.update();
   }).name('visualizer');
 
-mesh.rotation.x = Math.PI/2;
+mesh.rotation.x = -Math.PI/2;
 mesh.rotation.z = Math.PI/4;
 scene.add(mesh)
 
@@ -110,7 +154,7 @@ const handleSongChange = (e) => {
   audioLoader.load(URL.createObjectURL(file), function(buffer) {
     sound.setBuffer(buffer);
     sound.setLoop(true);
-    sound.setVolume(0.2);
+    sound.setVolume(1.0);
     sound.play();
   });
 }
@@ -123,9 +167,9 @@ const analyser = new THREE.AudioAnalyser( sound, 32768);
 // Controls
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
-controls.enableZoom = false;
-controls.enablePan = false;
-controls.enableRotate = false
+//controls.enableZoom = false;
+//controls.enablePan = false;
+//controls.enableRotate = false
 controls.update();
 
 
@@ -151,6 +195,16 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     const audioData = analyser.getAverageFrequency();
     circle.uniforms.audioData.value = audioData*0.4;
     lines.uniforms.audioData.value = audioData*0.3;
+    water.material.uniforms.uTime.value =audioData*0.015;
+    water.material.uniforms.uBigWavesSpeed.value = audioData*0.015;
+    water.material.uniforms.uSmallWavesSpeed.value = audioData*0.03;
+    water.material.uniforms.uBigWavesElevation.value = audioData*0.003;
+    water.material.uniforms.uSmallWavesElevation.value = audioData*0.005;
+    for(let i=0 ; i<count; i++){
+      const randomValue = (Math.random() * audioData) * 0.013
+      randoms[i] = randomValue;
+  }
+  geometry.setAttribute('aRandom',new THREE.BufferAttribute(randoms,1))
  }
 
 
