@@ -8,12 +8,32 @@ import Vertex1 from './shaders/test/vertex1.glsl'
 import waterVertexShader from "./shaders/water/vertex.glsl"
 import waterFragmentShader from "./shaders/water/fragment.glsl"
 
+import PointVertex from "./shaders/points/vertex.glsl"
+import PointFragment from "./shaders/points/fragment.glsl"
+import { Camera } from 'three'
+
 
 const gui = new dat.GUI()
 const debugObject = {}
 const debug = {}
 debug.depthColor = '#284382'
 debug.surfaceColor = '#b6a9f1'
+
+const parameters = {}
+parameters.count = 400000
+parameters.size = 0.005
+parameters.radius = 1.05
+parameters.branches = 2
+parameters.spin = 1
+parameters.randomness = 0.1
+parameters.randomnessPower = 1.5
+parameters.insideColor = '#ff6030'
+parameters.outsideColor = '#1b3984'
+
+let Pointmaterial = null
+let points = null
+let Pointgeometry = null;
+let isGenerated = false;
 
 const canvas = document.querySelector('canvas.webgl')
 
@@ -80,32 +100,6 @@ const lines = new THREE.RawShaderMaterial({
     }
 })
 
-const mesh = new THREE.Mesh(geometry, lines)
-gui.add(mesh, 'material', {
-    lines: lines,
-    circles: circle,
-    waves: waterMaterial,
-  }).onChange(() => {
-    if (mesh.material === circle) {
-      scene.remove(water)
-      scene.add(mesh)
-      camera.position.set(0, 15, 0);
-    } else if (mesh.material === lines) {
-      scene.remove(water)
-      scene.add(mesh)
-      camera.position.set(0, 1.5, 0);
-    }
-    else if (mesh.material === waterMaterial){
-      scene.remove(mesh)
-      scene.add(water)
-      camera.position.set(0, 2.89,  2.76);
-    }
-    controls.update();
-  }).name('visualizer');
-
-mesh.rotation.x = -Math.PI/2;
-mesh.rotation.z = Math.PI/4;
-scene.add(mesh)
 
 
 
@@ -145,12 +139,21 @@ camera.add( listener );
 
 const audioListener = new THREE.AudioListener();
 const sound = new THREE.Audio(audioListener);
+const audioLoader = new THREE.AudioLoader();
+
+audioLoader.load('/ambient6.mp3', function(buffer) {
+  sound.setBuffer(buffer);
+  sound.setLoop(true);
+  sound.setVolume(1.0);
+  sound.play();
+});
+
+
 const handleSongChange = (e) => {
   const file = e.target.files[0]; 
   if (sound.isPlaying) {
     sound.stop(); 
   }
-  const audioLoader = new THREE.AudioLoader();
   audioLoader.load(URL.createObjectURL(file), function(buffer) {
     sound.setBuffer(buffer);
     sound.setLoop(true);
@@ -158,6 +161,10 @@ const handleSongChange = (e) => {
     sound.play();
   });
 }
+
+
+
+
 songInput.addEventListener("change", handleSongChange);
 
 const analyser = new THREE.AudioAnalyser( sound, 32768);
@@ -186,6 +193,51 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 /**
  * Animate
  */
+ const mesh = new THREE.Mesh(waterGeometry, waterMaterial)
+ scene.add(mesh)
+
+camera.position.set(0, 2.89,  2.76);
+ gui.add(mesh, 'material', {
+  waves: waterMaterial,
+  points: isGenerated,
+  // lines: lines,
+  // circles: circle,
+}).onChange(() => {
+  // if (mesh.material === circle) {
+  //   isGenerated = false;
+  //   scene.remove(water)
+  //   scene.remove(points)
+  //   scene.add(mesh)
+  //   camera.position.set(0, 15, 0);
+  // } else if (mesh.material === lines) {
+  //   isGenerated = false;
+  //   scene.remove(water)
+  //   scene.remove(points)
+  //   scene.add(mesh)
+  //   camera.position.set(0, 1.5, 0);
+  // }
+  if (mesh.material === waterMaterial){//if adding back others change this to else
+    isGenerated = false;
+    scene.remove(mesh)
+    scene.remove(points)
+    scene.add(water)
+    camera.position.set(0, 2.89,  2.76);
+  }
+
+  else if(!isGenerated){
+    isGenerated = true;
+    scene.remove(mesh)
+    scene.remove(water)
+    camera.position.set(0,0.65,0)
+    generateGalaxy();
+  }
+  controls.update();
+}).name('visualizer');
+mesh.rotation.x = -Math.PI/2;
+
+
+
+
 
  const count =geometry.attributes.position.count
  const randoms = new Float32Array(count)
@@ -200,13 +252,109 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     water.material.uniforms.uSmallWavesSpeed.value = audioData*0.03;
     water.material.uniforms.uBigWavesElevation.value = audioData*0.003;
     water.material.uniforms.uSmallWavesElevation.value = audioData*0.005;
+
+    if(isGenerated){
+      Pointmaterial.uniforms.uAudioData.value = audioData*0.6;
+      Pointmaterial.uniforms.uTime.value = audioData;
+    }
     for(let i=0 ; i<count; i++){
       const randomValue = (Math.random() * audioData) * 0.013
       randoms[i] = randomValue;
   }
   geometry.setAttribute('aRandom',new THREE.BufferAttribute(randoms,1))
  }
+ const generateGalaxy = () =>
+{
+    if(points !== null)
+    {
+      Pointgeometry.dispose()
+      Pointmaterial.dispose()
+        scene.remove(points)
+        isGenerated = false;
+    }
 
+    /**
+     * Geometry
+     */
+    Pointgeometry = new THREE.BufferGeometry()
+
+    const positions = new Float32Array(parameters.count * 3)
+    const colors = new Float32Array(parameters.count * 3)
+    const scales = new Float32Array(parameters.count * 1)
+
+    const randomness = new Float32Array(parameters.count * 3)
+
+    const insideColor = new THREE.Color(parameters.insideColor)
+    const outsideColor = new THREE.Color(parameters.outsideColor)
+
+    for(let i = 0; i < parameters.count; i++)
+    {
+        const i3 = i * 3
+
+        // Position
+        const radius = Math.random() * parameters.radius
+
+        const branchAngle = (i % parameters.branches) / parameters.branches * Math.PI * 2
+
+        const randomX = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius
+        const randomY = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius
+        const randomZ = Math.pow(Math.random(), parameters.randomnessPower) * (Math.random() < 0.5 ? 1 : - 1) * parameters.randomness * radius
+
+        randomness[i3+0]= randomX;
+        randomness[i3+1]= randomY;
+        randomness[i3+2]= randomZ;
+        
+
+        positions[i3    ] = Math.cos(branchAngle) * radius 
+        positions[i3 + 1] = 0
+        positions[i3 + 2] = Math.sin(branchAngle) * radius 
+
+        // Color
+        const t = Math.pow(radius / parameters.radius,0.5); 
+        const mixedColor = insideColor.clone().lerp(outsideColor, t);
+
+        colors[i3    ] = mixedColor.r
+        colors[i3 + 1] = mixedColor.g
+        colors[i3 + 2] = mixedColor.b
+
+
+        scales[i] = Math.random()
+    }
+
+    Pointgeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    Pointgeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+    Pointgeometry.setAttribute('aScale', new THREE.BufferAttribute(scales, 1))
+    Pointgeometry.setAttribute('aRandomness', new THREE.BufferAttribute(randomness, 3))
+    /**
+     * Material
+     */
+     Pointmaterial = new THREE.ShaderMaterial({
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        vertexColors: true,
+        vertexShader:PointVertex,
+        fragmentShader: PointFragment,
+        uniforms:{
+            uAudioData: { value : 0},
+            uTime: {value: 0},
+            uSize: {value:30 * renderer.getPixelRatio()},
+        },
+    })
+
+    /**
+     * Points
+     */
+    points = new THREE.Points(Pointgeometry, Pointmaterial)
+    isGenerated = true;
+    scene.add(points)
+}
+gui.add(parameters, 'count').min(100).max(1000000).step(100).onFinishChange(generateGalaxy)
+gui.add(parameters, 'radius').min(0.01).max(20).step(0.01).onFinishChange(generateGalaxy)
+gui.add(parameters, 'branches').min(2).max(20).step(1).onFinishChange(generateGalaxy)
+gui.add(parameters, 'randomness').min(0).max(2).step(0.001).onFinishChange(generateGalaxy)
+gui.add(parameters, 'randomnessPower').min(1).max(10).step(0.001).onFinishChange(generateGalaxy)
+gui.addColor(parameters, 'insideColor').onFinishChange(generateGalaxy)
+gui.addColor(parameters, 'outsideColor').onFinishChange(generateGalaxy)
 
  const tick = () => {
      const elapsedTime = clock.getElapsedTime()
