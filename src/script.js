@@ -174,9 +174,9 @@ const analyser = new THREE.AudioAnalyser( sound, 32768);
 // Controls
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
-//controls.enableZoom = false;
-//controls.enablePan = false;
-//controls.enableRotate = false
+controls.enableZoom = false;
+controls.enablePan = false;
+controls.enableRotate = false
 controls.update();
 
 
