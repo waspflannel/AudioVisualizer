@@ -10,7 +10,7 @@ import waterFragmentShader from "./shaders/water/fragment.glsl"
 
 import PointVertex from "./shaders/points/vertex.glsl"
 import PointFragment from "./shaders/points/fragment.glsl"
-import { Camera } from 'three'
+import { Camera, PointsMaterial } from 'three'
 
 
 const gui = new dat.GUI()
@@ -34,6 +34,8 @@ let Pointmaterial = null
 let points = null
 let Pointgeometry = null;
 let isGenerated = false;
+
+
 
 const canvas = document.querySelector('canvas.webgl')
 
@@ -73,6 +75,7 @@ const waterMaterial = new THREE.ShaderMaterial({
   }
 })
 const water = new THREE.Mesh(waterGeometry, waterMaterial)
+let currentMaterial = waterMaterial;
 water.rotation.x = - Math.PI * 0.5
 
 const songInput = document.getElementById("myfile");
@@ -200,22 +203,8 @@ camera.position.set(0, 2.89,  2.76);
  gui.add(mesh, 'material', {
   waves: waterMaterial,
   points: isGenerated,
-  // lines: lines,
-  // circles: circle,
 }).onChange(() => {
-  // if (mesh.material === circle) {
-  //   isGenerated = false;
-  //   scene.remove(water)
-  //   scene.remove(points)
-  //   scene.add(mesh)
-  //   camera.position.set(0, 15, 0);
-  // } else if (mesh.material === lines) {
-  //   isGenerated = false;
-  //   scene.remove(water)
-  //   scene.remove(points)
-  //   scene.add(mesh)
-  //   camera.position.set(0, 1.5, 0);
-  // }
+
   if (mesh.material === waterMaterial){//if adding back others change this to else
     isGenerated = false;
     scene.remove(mesh)
@@ -234,11 +223,6 @@ camera.position.set(0, 2.89,  2.76);
   controls.update();
 }).name('visualizer');
 mesh.rotation.x = -Math.PI/2;
-
-
-
-
-
  const count =geometry.attributes.position.count
  const randoms = new Float32Array(count)
  const clock = new THREE.Clock()
@@ -247,6 +231,8 @@ mesh.rotation.x = -Math.PI/2;
     const audioData = analyser.getAverageFrequency();
     circle.uniforms.audioData.value = audioData*0.4;
     lines.uniforms.audioData.value = audioData*0.3;
+
+    //move water balues
     water.material.uniforms.uTime.value =audioData*0.015;
     water.material.uniforms.uBigWavesSpeed.value = audioData*0.015;
     water.material.uniforms.uSmallWavesSpeed.value = audioData*0.03;
@@ -320,7 +306,7 @@ mesh.rotation.x = -Math.PI/2;
 
         scales[i] = Math.random()
     }
-
+    
     Pointgeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
     Pointgeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
     Pointgeometry.setAttribute('aScale', new THREE.BufferAttribute(scales, 1))
@@ -348,13 +334,6 @@ mesh.rotation.x = -Math.PI/2;
     isGenerated = true;
     scene.add(points)
 }
-gui.add(parameters, 'count').min(100).max(1000000).step(100).onFinishChange(generateGalaxy)
-gui.add(parameters, 'radius').min(0.01).max(20).step(0.01).onFinishChange(generateGalaxy)
-gui.add(parameters, 'branches').min(2).max(20).step(1).onFinishChange(generateGalaxy)
-gui.add(parameters, 'randomness').min(0).max(2).step(0.001).onFinishChange(generateGalaxy)
-gui.add(parameters, 'randomnessPower').min(1).max(10).step(0.001).onFinishChange(generateGalaxy)
-gui.addColor(parameters, 'insideColor').onFinishChange(generateGalaxy)
-gui.addColor(parameters, 'outsideColor').onFinishChange(generateGalaxy)
 
  const tick = () => {
      const elapsedTime = clock.getElapsedTime()
